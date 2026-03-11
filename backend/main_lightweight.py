@@ -8,6 +8,7 @@ This version focuses on API-based AI services for better performance and reliabi
 import logging
 import sys
 import time
+import os
 from pathlib import Path
 
 # Add backend directory to path for imports
@@ -47,10 +48,11 @@ async def log_requests(request, call_next):
     logger.info("%s %s -> %s (%sms)", request.method, request.url.path, response.status_code, duration_ms)
     return response
 
-# Configure CORS
+# Configure CORS using environment variable
+origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update for production
+    allow_origins=origins,  # specify the frontend host(s) in ALLOWED_ORIGINS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

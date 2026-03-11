@@ -16,8 +16,19 @@ import os
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 # MongoDB connection
-MONGO_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+# The application reads the connection URL from the MONGODB_URL environment
+# variable. For local development you can run a local Mongo instance, but for
+# production (Atlas) set an explicit string such as:
+#   mongodb+srv://gopal:YOUR_PASSWORD@cluster0.mgjmdpp.mongodb.net/pathfinder?retryWrites=true&w=majority
+# Leaving the default blank will point at localhost which may fail if no server
+# is running.
+MONGO_URL = os.getenv("MONGODB_URL", "mongodb+srv://gopal:gopal@2005@cluster0.mgjmdpp.mongodb.net/?appName=Cluster0")
 DB_NAME = "pathfinder"
+
+# warn if using the localhost default while not on localhost
+if MONGO_URL.startswith("mongodb://localhost"):
+    print("⚠️  Using default MongoDB URL (localhost). "
+          "Set MONGODB_URL to your Atlas connection string to connect to the cloud.")
 USERS_COLLECTION = "users"
 
 # JWT config
@@ -28,9 +39,15 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
 # Database helper
 def get_db():
     """Get MongoDB database connection"""
-    client = MongoClient(MONGO_URL)
-    db = client[DB_NAME]
-    return db
+    try:
+        client = MongoClient(MONGO_URL)
+        # optional ping to verify connection
+        client.admin.command('ping')
+        db = client[DB_NAME]
+        return db
+    except Exception as e:
+        print(f"MongoDB connection error: {e}")
+        raise
 
 # Models
 class UserSignup(BaseModel):

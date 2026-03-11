@@ -8,6 +8,7 @@ This module will later be extended to include RAG pipeline integration.
 import logging
 import sys
 import time
+import os
 from pathlib import Path
 
 # Add backend directory to path for imports
@@ -43,10 +44,11 @@ async def log_requests(request, call_next):
     return response
 
 # Configure CORS to allow frontend connections
-# In production, specify exact origins instead of "*"
+# Uses ALLOWED_ORIGINS environment variable (comma-separated list). Defaults to all.
+origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins - update for production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import API from '../api';
 import { Mail, Lock, User, AlertCircle, Sparkles, Chrome, ArrowRight } from 'lucide-react';
 
 const Signup = () => {
@@ -26,12 +27,23 @@ const Signup = () => {
     e.preventDefault();
     if (!validateForm()) return;
     setLoading(true);
-    
-    // Simulate API call for UI demonstration
-    setTimeout(() => {
-        setLoading(false);
-        // navigate('/dashboard');
-    }, 1500);
+
+    try {
+      // send actual request to backend
+      const response = await API.post('/auth/signup', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      // you might want to store token in localStorage
+      localStorage.setItem('access_token', response.data.access_token);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || 'Signup failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reusable Background Component
