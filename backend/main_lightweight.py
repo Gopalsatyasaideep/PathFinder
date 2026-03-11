@@ -20,14 +20,19 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import only the core routers we need for lightweight operation
-from routers import resume
-from routers import lightweight_analysis as analysis
-from routers import chat
-from routers import auth
-from routers import user_history
-from routers import mock_interview
-
-from schemas.api_models import JobRecommendationsQuery
+try:
+    from routers import resume
+    from routers import lightweight_analysis as analysis
+    from routers import chat
+    from routers import auth
+    from routers import user_history
+    from routers import mock_interview
+    from schemas.api_models import JobRecommendationsQuery
+except Exception as e:
+    print(f"ERROR: Failed to import routers: {e}")
+    import traceback
+    traceback.print_exc()
+    raise
 
 # Initialize FastAPI app
 app = FastAPI(
