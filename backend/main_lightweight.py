@@ -19,20 +19,18 @@ if str(backend_dir) not in sys.path:
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-# Import only the core routers we need for lightweight operation
-try:
-    from routers import resume
-    from routers import lightweight_analysis as analysis
-    from routers import chat
-    from routers import auth
-    from routers import user_history
-    from routers import mock_interview
-    from schemas.api_models import JobRecommendationsQuery
-except Exception as e:
-    print(f"ERROR: Failed to import routers: {e}")
-    import traceback
-    traceback.print_exc()
-    raise
+import logging
+import os
+import sys
+from pathlib import Path
+
+# Add backend to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+print("✅ [1/5] Core imports done...")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -45,13 +43,14 @@ app = FastAPI(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pathfinder")
 
-@app.middleware("http")
-async def log_requests(request, call_next):
-    start = time.time()
-    response = await call_next(request)
-    duration_ms = int((time.time() - start) * 1000)
-    logger.info("%s %s -> %s (%sms)", request.method, request.url.path, response.status_code, duration_ms)
-    return response
+# Initialize FastAPI app FIRST - NO router imports yet
+app = FastAPI(
+    title="PathFinder AI - Enhanced",
+    description="AI-Powered Resume Analyzer with NVIDIA API Integration",
+    version="2.0.0"
+)
+
+print("✅ FastAPI app initialized")
 
 # Configure CORS using environment variable
 origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
@@ -63,17 +62,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register error handlers
+print("✅ CORS configured")
+
+# Register error handlers FIRST
 from utils.error_handler import register_error_handlers
 register_error_handlers(app)
 
-# Include core routers
-app.include_router(auth.router)
-app.include_router(resume.router)
-app.include_router(analysis.router)
-app.include_router(chat.router)
-app.include_router(user_history.router)
-app.include_router(mock_interview.router)
+print("✅ Error handlers registered")
 
 @app.get("/")
 async def root():
@@ -83,26 +78,53 @@ async def root():
     return {
         "service": "PathFinder AI - Enhanced",
         "version": "2.0.0",
-        "description": "AI-Powered Resume Analysis with NVIDIA Integration",
-        "features": [
-            "Resume parsing (PDF/DOCX)",
-            "AI-powered analysis (NVIDIA API)",
-            "Job recommendations",
-            "Learning path generation",
-            "Fallback to OpenRouter API"
-        ],
-        "endpoints": {
-            "upload_resume": "POST /upload-resume",
-            "analyze_profile": "POST /analyze-profile", 
-            "quick_analysis": "POST /analyze-profile/quick-analysis",
-            "chat": "POST /chat",
-            "docs": "/docs",
-            "health": "/health"
-        }
+        "status": "online"
     }
 
 @app.get("/health")
 async def health_check():
+    """
+    Health check - minimal version for startup diagnostics.
+    """
+    return {
+        "status": "healthy",
+        "service": "PathFinder AI - Enhanced",
+        "version": "2.0.0"
+    }
+
+print("✅ Core endpoints initialized")
+
+# NOW lazy-load routers on first use
+_routers_loaded = False
+
+def load_routers():
+    """Lazy-load routers only when first request comes in"""
+    global _routers_loaded
+    if _routers_loaded:
+        return
+    
+    print("⏳ Loading routers...")
+    try:
+        from routers import resume, chat, auth, user_history, mock_interview
+        app.include_router(auth.router)
+        app.include_router(resume.router)
+        app.include_router(chat.router)
+        app.include_router(user_history.router)
+        app.include_router(mock_interview.router)
+        print("✅ All routers loaded successfully")
+        _routers_loaded = True
+    except Exception as e:
+        print(f"⚠️  WARNING: Could not load routers: {e}")
+        import traceback
+        traceback.print_exc()
+        _routers_loaded = True  # Don't try again
+
+@app.middleware("http")
+async def load_routers_middleware(request, call_next):
+    """Ensure routers are loaded on first request"""
+    load_routers()
+    response = await call_next(request)
+    return response
     """
     Enhanced health check endpoint with AI services status.
     """
