@@ -22,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 #   mongodb+srv://gopal:YOUR_PASSWORD@cluster0.mgjmdpp.mongodb.net/pathfinder?retryWrites=true&w=majority
 # Leaving the default blank will point at localhost which may fail if no server
 # is running.
-MONGO_URL = os.getenv("MONGODB_URL", "mongodb+srv://gopal:gopal@2005@cluster0.mgjmdpp.mongodb.net/?appName=Cluster0")
+MONGO_URL = os.getenv("MONGODB_URL", "mongodb+srv://gopal:gopal%402005@cluster0.mgjmdpp.mongodb.net/?appName=Cluster0")
 DB_NAME = "pathfinder"
 
 # warn if using the localhost default while not on localhost
