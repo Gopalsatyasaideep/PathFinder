@@ -1,0 +1,21 @@
+Data Engineer Job Description
+
+We are looking for a skilled Data Engineer to join our team. The ideal candidate should have:
+
+Required Skills:
+- Python programming
+- SQL and database management
+- AWS cloud services (EC2, S3, Lambda)
+- ETL pipelines
+- Apache Spark
+- Docker and containerization
+- Data warehousing
+
+Responsibilities:
+- Design and build scalable data pipelines
+- Optimize data processing workflows
+- Maintain data infrastructure on AWS
+- Collaborate with data scientists and analysts
+
+Experience Level: Mid to Senior
+Domain: Data Engineering, Big Data

@@ -1,0 +1,21 @@
+Software Developer Job Description
+
+We are seeking an experienced Software Developer with strong technical skills.
+
+Required Skills:
+- Python or Java programming
+- React or Angular for frontend
+- REST API development
+- SQL databases
+- Git version control
+- Docker
+- CI/CD pipelines
+
+Responsibilities:
+- Develop web applications
+- Write clean, maintainable code
+- Participate in code reviews
+- Deploy applications using Docker
+
+Experience Level: Entry to Mid
+Domain: Software Development, Web Development

@@ -1,0 +1,20 @@
+Apache Spark for Big Data Processing
+
+Advanced course on distributed data processing with Spark.
+
+Topics:
+- Spark architecture
+- RDDs and DataFrames
+- Spark SQL
+- Streaming with Spark
+- Performance optimization
+
+Recommended for: Advanced developers
+Duration: 3-4 weeks
+Resources:
+- Spark official documentation
+- Databricks learning platform
+- Advanced Spark books
+
+Difficulty: Advanced
+Phase: Advanced

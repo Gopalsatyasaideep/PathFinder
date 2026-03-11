@@ -1,0 +1,20 @@
+Docker Containerization Tutorial
+
+Learn Docker from scratch to advanced level.
+
+Topics:
+- Container basics
+- Dockerfile creation
+- Docker Compose
+- Container orchestration
+- Best practices
+
+Recommended for: Intermediate developers
+Duration: 2-3 weeks
+Resources:
+- Docker official documentation
+- YouTube Docker tutorials
+- Hands-on practice projects
+
+Difficulty: Intermediate
+Phase: Intermediate

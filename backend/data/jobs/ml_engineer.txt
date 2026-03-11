@@ -1,0 +1,21 @@
+Machine Learning Engineer Position
+
+Join our ML team to build intelligent systems.
+
+Required Skills:
+- Python programming
+- Machine Learning frameworks (TensorFlow, PyTorch)
+- Data Science (Pandas, NumPy)
+- SQL databases
+- AWS or GCP cloud platforms
+- Docker
+- MLOps practices
+
+Responsibilities:
+- Develop ML models
+- Deploy models to production
+- Optimize model performance
+- Work with large datasets
+
+Experience Level: Mid to Senior
+Domain: Machine Learning, AI, Data Science

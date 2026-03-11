@@ -1,0 +1,20 @@
+Python Programming Basics - Learning Resource
+
+This is a beginner-friendly guide to Python programming.
+
+Topics Covered:
+- Python syntax and fundamentals
+- Variables and data types
+- Control flow (if/else, loops)
+- Functions and modules
+- Object-oriented programming basics
+
+Recommended for: Beginners
+Duration: 2-3 weeks
+Resources:
+- Python.org official tutorial
+- Codecademy Python course
+- Real Python beginner guides
+
+Difficulty: Beginner
+Phase: Foundation
