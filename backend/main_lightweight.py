@@ -53,10 +53,21 @@ app = FastAPI(
 print("✅ FastAPI app initialized")
 
 # Configure CORS using environment variable
-origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# For production, set ALLOWED_ORIGINS=https://your-vercel-app.vercel.app on Render
+origins_env = os.getenv("ALLOWED_ORIGINS", "")
+if origins_env:
+    origins = [o.strip() for o in origins_env.split(",") if o.strip()]
+    # Ensure exact Vercel URL is allowed
+    if "pathfinderai-psi.vercel.app" not in str(origins):
+        origins.append("https://pathfinderai-psi.vercel.app")
+else:
+    origins = ["*"]  # Allow all for development
+    
+print(f"CORS Origins: {origins}")  # Debug logging
+    
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # specify the frontend host(s) in ALLOWED_ORIGINS
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
