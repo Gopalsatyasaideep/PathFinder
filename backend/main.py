@@ -45,15 +45,20 @@ async def log_requests(request, call_next):
 
 # Configure CORS to allow frontend connections
 # Uses ALLOWED_ORIGINS environment variable (comma-separated list). Defaults to all.
-# For production, set ALLOWED_ORIGINS=https://your-vercel-app.vercel.app on Render
+# For production, set ALLOWED_ORIGINS=https://pathfinderai-psi.vercel.app on Render
 origins_env = os.getenv("ALLOWED_ORIGINS", "")
 if origins_env:
     origins = [o.strip() for o in origins_env.split(",") if o.strip()]
     # Ensure exact Vercel URL is allowed
-    if "pathfinderai-psi.vercel.app" not in str(origins):
+    if "https://pathfinderai-psi.vercel.app" not in origins:
         origins.append("https://pathfinderai-psi.vercel.app")
 else:
-    origins = ["*"]  # Allow all for development
+    # Default origins for development and production if not specified
+    origins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://pathfinderai-psi.vercel.app",
+    ]
     
 print(f"CORS Origins: {origins}")  # Debug logging
     
