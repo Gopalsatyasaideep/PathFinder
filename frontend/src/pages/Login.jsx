@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { apiService } from '../services/api';
 import { Mail, Lock, AlertCircle, Sparkles, Chrome, ArrowRight } from 'lucide-react';
 
 const Login = () => {
@@ -20,25 +21,11 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Login failed');
-      }
-
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      await apiService.login(formData.email, formData.password);
       localStorage.setItem('isAuthenticated', 'true');
-
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.detail || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

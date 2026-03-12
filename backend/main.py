@@ -171,51 +171,31 @@ async def dashboard_data(
 
 if __name__ == "__main__":
     import uvicorn
-    from services.nvidia_client import get_nvidia_client
-    from services.openrouter_client import get_openrouter_client
+    import os
+
+    # Render sets the PORT environment variable
+    port = int(os.environ.get("PORT", 8000))
     
     print("🚀 Starting PathFinder AI Backend...")
+    print(f"🌐 Server will be available at: http://0.0.0.0:{port}")
     print("=" * 50)
     
     # Check and report AI service availability
+    from services.nvidia_client import get_nvidia_client
+    from services.openrouter_client import get_openrouter_client
+    
     nvidia_client = get_nvidia_client()
     openrouter_client = get_openrouter_client()
     
     print("🤖 AI Services Status:")
     if nvidia_client:
         print("   ✅ NVIDIA API - Available (Premium features)")
-        primary_service = "NVIDIA API with Qwen 3 Next 80B"
     else:
         print("   ❌ NVIDIA API - Not configured")
     
     if openrouter_client:
         print("   ✅ OpenRouter API - Available (Free tier)")
-        if not nvidia_client:
-            primary_service = "OpenRouter API with free models"
     else:
         print("   ❌ OpenRouter API - Not configured")
     
-    if not nvidia_client and not openrouter_client:
-        print("   ⚠️  No AI APIs configured - using basic fallback mode")
-        primary_service = "Basic fallback (limited features)"
-    
-    print(f"\n🎯 Primary AI Service: {primary_service}")
-    print("\n💡 To enable enhanced AI features:")
-    print("   • NVIDIA API: Set NVIDIA_API_KEY environment variable")
-    print("   • OpenRouter API: Set OPENROUTER_API_KEY environment variable")
-    print("   • Get NVIDIA key: https://build.nvidia.com/explore/discover")
-    print("   • Get OpenRouter key: https://openrouter.ai/keys")
-    
-    print("\n🌐 Starting server...")
-    print("   • Backend: http://localhost:8000")
-    print("   • API Docs: http://localhost:8000/docs")
-    print("   • Health Check: http://localhost:8000/health")
-    print("=" * 50)
-    
-if __name__ == "__main__":
-    import uvicorn
-    import os
-
-    port = int(os.environ.get("PORT", 8000))
-
     uvicorn.run(app, host="0.0.0.0", port=port)

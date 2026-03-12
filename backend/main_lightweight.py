@@ -6,9 +6,9 @@ This version focuses on API-based AI services for better performance and reliabi
 """
 
 import logging
+import os
 import sys
 import time
-import os
 from pathlib import Path
 
 # Add backend directory to path for imports
@@ -16,21 +16,13 @@ backend_dir = Path(__file__).parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Body
 from fastapi.middleware.cors import CORSMiddleware
+from utils.error_handler import register_error_handlers
 
-import logging
-import os
-import sys
-from pathlib import Path
-
-# Add backend to path
-sys.path.insert(0, str(Path(__file__).parent))
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-print("✅ [1/5] Core imports done...")
+# Basic logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("pathfinder")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -39,32 +31,19 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# Basic request logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("pathfinder")
-
-# Initialize FastAPI app FIRST - NO router imports yet
-app = FastAPI(
-    title="PathFinder AI - Enhanced",
-    description="AI-Powered Resume Analyzer with NVIDIA API Integration",
-    version="2.0.0"
-)
-
-print("✅ FastAPI app initialized")
-
-# Configure CORS using environment variable
-# For production, set ALLOWED_ORIGINS=https://your-vercel-app.vercel.app on Render
+# Configure CORS
 origins_env = os.getenv("ALLOWED_ORIGINS", "")
 if origins_env:
     origins = [o.strip() for o in origins_env.split(",") if o.strip()]
-    # Ensure exact Vercel URL is allowed
-    if "pathfinderai-psi.vercel.app" not in str(origins):
+    if "https://pathfinderai-psi.vercel.app" not in origins:
         origins.append("https://pathfinderai-psi.vercel.app")
 else:
-    origins = ["*"]  # Allow all for development
-    
-print(f"CORS Origins: {origins}")  # Debug logging
-    
+    origins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://pathfinderai-psi.vercel.app",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -73,39 +52,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("✅ CORS configured")
-
-# Register error handlers FIRST
-from utils.error_handler import register_error_handlers
+# Register error handlers
 register_error_handlers(app)
 
-print("✅ Error handlers registered")
-
-@app.get("/")
-async def root():
-    """
-    Root endpoint with API information.
-    """
-    return {
-        "service": "PathFinder AI - Enhanced",
-        "version": "2.0.0",
-        "status": "online"
-    }
-
-@app.get("/health")
-async def health_check():
-    """
-    Health check - minimal version for startup diagnostics.
-    """
-    return {
-        "status": "healthy",
-        "service": "PathFinder AI - Enhanced",
-        "version": "2.0.0"
-    }
-
-print("✅ Core endpoints initialized")
-
-# NOW lazy-load routers on first use
+# Lazy-load routers to speed up initial startup and health checks
 _routers_loaded = False
 
 def load_routers():
@@ -128,21 +78,29 @@ def load_routers():
         print(f"⚠️  WARNING: Could not load routers: {e}")
         import traceback
         traceback.print_exc()
-        _routers_loaded = True  # Don't try again
+        _routers_loaded = True
 
 @app.middleware("http")
-async def load_routers_middleware(request, call_next):
+async def ensure_routers_loaded(request, call_next):
     """Ensure routers are loaded on first request"""
-    load_routers()
+    if request.url.path not in ["/", "/health", "/docs", "/openapi.json"]:
+        load_routers()
     response = await call_next(request)
     return response
-    """
-    Enhanced health check endpoint with AI services status.
-    """
+
+@app.get("/")
+async def root():
+    return {
+        "service": "PathFinder AI - Enhanced",
+        "version": "2.0.0",
+        "status": "online"
+    }
+
+@app.get("/health")
+async def health_check():
     from services.nvidia_client import get_nvidia_client
     from services.openrouter_client import get_openrouter_client
     
-    # Check AI service availability
     nvidia_available = get_nvidia_client() is not None
     openrouter_available = get_openrouter_client() is not None
     
@@ -152,34 +110,20 @@ async def load_routers_middleware(request, call_next):
         "version": "2.0.0",
         "ai_services": {
             "nvidia_api": "available" if nvidia_available else "not_configured",
-            "openrouter_api": "available" if openrouter_available else "not_configured",
-            "primary_service": "nvidia" if nvidia_available else "openrouter" if openrouter_available else "basic_fallback"
-        },
-        "features": {
-            "resume_parsing": "enabled",
-            "ai_analysis": "enabled" if (nvidia_available or openrouter_available) else "basic_mode",
-            "job_recommendations": "enabled" if (nvidia_available or openrouter_available) else "basic_mode",
-            "learning_paths": "enabled" if (nvidia_available or openrouter_available) else "basic_mode"
+            "openrouter_api": "available" if openrouter_available else "not_configured"
         }
     }
 
 # Basic job recommendations endpoint (minimal version)
 @app.post("/job-recommendations")
-async def get_job_recommendations(
-    resume_data: dict,
-):
-    """
-    Get job recommendations using AI services.
-    """
+async def get_job_recommendations(resume_data: dict = Body(...)):
     try:
         from services.minimal_ai_service_manager import get_minimal_ai_service_manager
-        
         ai_manager = get_minimal_ai_service_manager()
         recommendations = ai_manager.generate_job_recommendations(
             resume_data, 
             num_recommendations=5
         )
-        
         return {
             "recommended_jobs": recommendations,
             "message": "Job recommendations generated successfully"
@@ -193,10 +137,6 @@ async def get_job_recommendations(
 
 @app.get("/dashboard-data")
 async def dashboard_data():
-    """
-    Dashboard data endpoint - returns empty structure.
-    Frontend should use localStorage data from resume upload.
-    """
     return {
         "name": None,
         "extractedSkills": [],
@@ -210,5 +150,5 @@ async def dashboard_data():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    print("PORT env:", port)
+    print(f"🚀 Starting server on 0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
