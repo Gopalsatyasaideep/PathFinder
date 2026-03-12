@@ -1,15 +1,13 @@
 import axios from 'axios';
 
 // Base API URL - MUST be set via environment variable for production
-// For Vercel: Add VITE_API_BASE_URL in Vercel project settings
-// Example: VITE_API_BASE_URL=https://your-render-backend.onrender.com
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
-console.log('API Base URL:', API_BASE_URL);
+// For Vercel: Add VITE_API_URL in Vercel project settings
+// Example: VITE_API_URL=https://pathfinderai2026-1.onrender.com
+const API_URL = import.meta.env.VITE_API_URL || 'https://pathfinderai2026-1.onrender.com';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
